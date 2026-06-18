@@ -1,0 +1,106 @@
+.faqsec {
+    padding: 40px 0px;
+}
+
+.question button {
+    font-size: 22px;
+}
+
+.faqsec button {
+    padding: 20px 30px;
+}
+
+.accordionbody {
+    padding: 0px 30px;
+}
+
+.accordionbodybtn {
+    cursor: pointer;
+}
+
+
+.accordionbodybtn {
+    color: #2a3b77;
+    margin: 10px 0px;
+    padding: 12px 30px;
+
+}
+
+.footercta a, .footercta button {
+    width: 100% !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.footercta {
+    display: flex;
+}
+
+.footercta a {
+    padding: 0 !important;
+    flex: 1;
+}
+
+.branchCard {
+    background-color: #f8fbff;
+    border: 1px solid #e1eefc;
+    border-radius: 20px;
+    padding: 30px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.branchCard h5 {
+    color: #2A3B77;
+    font-weight: 700;
+}
+
+.branchCard p {
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+
+
+@media (width < 1200px) {
+    .question button {
+        font-size: 18px;
+    }
+
+
+}
+
+@media(width < 768px){
+      .stablediv {
+        position: fixed;
+        left: 0;
+        bottom: 0px;
+        width: 100%;
+        background-color: #fff;
+        padding: 20px;
+      box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.10);
+    }
+}
+
+@media (width < 576px) {
+    .footerctastable {
+        display: block;
+        position: fixed;
+        bottom: 10px;
+    }
+
+    .footercta {
+        display: none !important;
+    }
+}
+
+.socialIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.socialIcon:hover {
+    transform: scale(1.15);
+}

@@ -1,0 +1,48 @@
+import React from "react";
+import styles from "./styles.module.css";
+import SubBanner from "@/common/SubBanner";
+import Title from "@/common/Title";
+import DoctorCard from "@/common/DoctorCard";
+const TopDoctor = ({ data, consultData, handleTogglecontactForm }) => {
+  return (
+    <section>
+      <div className="mt-5 my-3">
+        <Title name={data?.title} />
+        <div className="w-100 d-flex gap-4 flex-column justify-content-start mt-3">
+          {data?.doctorList?.map((item,index) => (
+            <DoctorCard
+              name={item?.name}
+              img={item?.img}
+              experience={item?.experience}
+              reviews={item?.reviews}
+              destination1={item?.destination1}
+              destination2={item?.destination2}
+              data={data}
+              key={index}
+              handleTogglecontactForm={handleTogglecontactForm}
+            />
+          ))}
+        </div>
+
+        <SubBanner
+          title={consultData?.title?.split(' ').slice(0, 1).join(' ')}
+          spantitle={consultData?.title?.split(' ').slice(1).join(' ')}
+          content={consultData?.description}
+          btn_name={consultData?.buttontxt}
+          btn_txtcolor={"#fff"}
+          bgcolor="#E0FAF4"
+          spancolor="#21a179"
+          bordercolor="#21a179"
+          btn_bgcolor="#21a179"
+          img={"/assets/consultDoctor.webp"}
+          imgheight={250}
+          href="https://wa.me/917075008561"
+          imgwidth={250}
+          scale={1.4}
+        />
+      </div>
+    </section>
+  );
+};
+
+export default TopDoctor;
