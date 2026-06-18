@@ -7,7 +7,7 @@ export const HomeData = {
       "Child-Friendly Eye Evaluation by Experienced Eye Specialists",
       "Early Diagnosis & Timely Treatment for Better Visual Development",
     ],    images: [
-      "/assets/bannerImage1.jpg",
+      "/assets/bannerImage1.JPG",
       "/assets/bannerImage2.jpg",
       "/assets/bannerImage3.JPG",
     ],  },
