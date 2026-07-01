@@ -9,7 +9,7 @@ export default function App({ Component, pageProps }) {
   useUTMSource();
   return (
     <>
-      {/* <Script
+      <Script
         id="microsoft-clarity"
         strategy="afterInteractive"
       >
@@ -18,9 +18,9 @@ export default function App({ Component, pageProps }) {
               c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
               t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
               y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-          })(window, document, "clarity", "script", "t61yg323ge");
+          })(window, document, "clarity", "script", "w058nqo6h5");
         `}
-      </Script> */}
+      </Script>
       {/* <Script id="gtm-script" strategy="afterInteractive">
         {`
           (function(w,d,s,l,i){
