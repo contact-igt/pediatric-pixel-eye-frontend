@@ -24,6 +24,36 @@ The `pages/api` directory is mapped to `/api/*`. Files in this directory are tre
 
 This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Environment Variables
+
+Create a `.env.local` file with the lead submission values used by the forms:
+
+```env
+NEXT_PUBLIC_BACKEND_URL=https://your-backend-domain.com
+NEXT_PUBLIC_CLIENT_KEY=pixeleye
+NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/s/your-script-id/exec
+```
+
+Lead submission flow:
+
+1. Submit to `POST {NEXT_PUBLIC_BACKEND_URL}/api/v1/pixeleye/website-leads/register`
+2. Send headers:
+   `Content-Type: application/json`
+   `X-Client-Key: {NEXT_PUBLIC_CLIENT_KEY || "pixeleye"}`
+3. Send payload:
+
+```json
+{
+  "name": "patientName",
+  "mobile_number": "mobileNumber",
+  "service": "Pediatric",
+  "ip_address": "ipAddress",
+  "utm_source": "utmSource"
+}
+```
+
+If the primary API fails or is not configured, the forms fall back to the Google Apps Script URL.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
@@ -37,4 +67,4 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+Check out [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
