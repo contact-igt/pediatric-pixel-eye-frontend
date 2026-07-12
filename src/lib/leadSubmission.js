@@ -81,6 +81,21 @@ async function submitLeadToGoogleScript({
   });
 }
 
+async function submitLeadToPrivyr({ patientName, mobileNumber }) {
+  await fetch("https://www.privyr.com/api/v1/incoming-leads/0vZfjMQw/xKtkqD5A", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: patientName,
+      phone: `+91${mobileNumber}`,
+      display_name: patientName,
+      source: "Pediatric Landing Page",
+    }),
+  });
+}
+
 async function sendLeadEmail({ patientName, mobileNumber }) {
   await emailjs.send(
     "service_9ka2q7j",
@@ -124,5 +139,6 @@ export async function submitPediatricLead({ patientName, mobileNumber }) {
     });
   }
 
+  await submitLeadToPrivyr({ patientName, mobileNumber });
   await sendLeadEmail({ patientName, mobileNumber });
 }
