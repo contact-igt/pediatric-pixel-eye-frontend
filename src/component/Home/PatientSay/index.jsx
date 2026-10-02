@@ -26,7 +26,7 @@ const PatientSay = ({ handleTogglecontactForm }) => {
     {
       imgUrl: "/assets/testimonialimg5.png",
       videoUrl:
-        "https://res.cloudinary.com/dnttl4dnz/video/upload/v1763028743/squint3_eemhmi.mp4",
+        "https://res.cloudinary.com/fdhst4av/video/upload/v1790942597/Lazy-Eye-Treatment-SnapYT.App_1.mp4",
       name: "Patient Testimonial 5"
     },
     // {
