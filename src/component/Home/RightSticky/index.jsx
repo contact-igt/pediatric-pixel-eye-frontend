@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import styles from "./styles.module.css";
 import Button from "@/common/Button";
+import emailjs from "emailjs-com";
+import { submitLeadWithFallback } from "@/lib/leadSubmission";
 import { useRouter } from "next/router";
 import { submitPediatricLead } from "@/lib/leadSubmission";
 
@@ -32,11 +34,26 @@ const RightSticky = ({ isEmbedded }) => {
     }
     try {
       setLoading(true);
-      setError("");
-      await submitPediatricLead({
-        patientName: formData?.PatientName || "",
-        mobileNumber: formData.MobileNumber,
+      // The backend saves the lead and mirrors it to the Google Sheet itself;
+      // the Apps Script is only called if the backend call fails.
+      await submitLeadWithFallback({
+        name: formData?.PatientName,
+        mobile: formData.MobileNumber,
       });
+
+      await emailjs.send(
+        "service_9ka2q7j",
+        "template_88icron",
+        {
+          patient_name: formData.PatientName || "Guest Patient",
+          mobile_number: formData.MobileNumber,
+          service_name: "Pediatric Eye Care",
+          email_subject: "Pediatric Eye Care",
+          from_name: "Pixel Eye Hospitals",
+          from_email: "info@pixeleyehospitals.com"
+        },
+        "CNcEBk9-YnTm2Zwor"
+      );
       setLoading(false);
       router.push("/thank-you");
     } catch (error) {

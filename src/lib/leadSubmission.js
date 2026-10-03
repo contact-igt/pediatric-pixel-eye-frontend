@@ -1,144 +1,91 @@
-import emailjs from "emailjs-com";
+const SERVICE_NAME = "Pediatric";
+const SOURCE_KEY = "pediatric";
 
-async function getIpAddress() {
-  try {
-    const ipResponse = await fetch("https://api.ipify.org?format=json");
+// Fallback only: used when the backend API call fails.
+const GOOGLE_APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbzG-ZMTUI44rNY7i80bvBVcA6UFPdi95c-2HKZ4ZmI2NJWyWZpKsYV9V9HqlMBjyhF1/exec";
 
-    if (!ipResponse.ok) {
-      return "";
-    }
+// Base URL may be given with or without the /api/v1 suffix.
+const buildBackendLeadUrl = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
 
-    const ipData = await ipResponse.json();
-    return ipData?.ip || "";
-  } catch (error) {
-    console.error("IP lookup failed", error);
-    return "";
-  }
-}
-
-function getUtmSource() {
-  if (typeof window === "undefined") {
-    return "direct";
-  }
-
-  try {
-    return localStorage.getItem("utm_source") || "direct";
-  } catch (error) {
-    return "direct";
-  }
-}
-
-async function submitLeadToPrimaryApi(payload) {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-  if (!backendUrl) {
+  if (!baseUrl) {
     throw new Error("NEXT_PUBLIC_BACKEND_URL is not configured.");
   }
 
-  const response = await fetch(
-    `${backendUrl}/api/v1/pixeleye/website-leads/register`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Client-Key": process.env.NEXT_PUBLIC_CLIENT_KEY || "pixeleye",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
+  const apiBase = `${baseUrl.replace(/\/+(api\/v1)?\/*$/, "")}/api/v1`;
+  return `${apiBase}/pixeleye/website-leads/register`;
+};
+
+const getIpAddress = async () => {
+  try {
+    const response = await fetch("https://api.ipify.org?format=json");
+    if (!response.ok) return "";
+    const data = await response.json();
+    return data?.ip || "";
+  } catch (error) {
+    console.error("IP lookup failed, continuing without IP address", error);
+    return "";
+  }
+};
+
+const submitToBackend = async ({ name, mobile, ipAddress, utmSource }) => {
+  const clientKey = process.env.NEXT_PUBLIC_CLIENT_KEY?.trim() || "pixeleye";
+
+  const response = await fetch(buildBackendLeadUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Client-Key": clientKey,
+    },
+    body: JSON.stringify({
+      name: name || "Guest Patient",
+      mobile_number: mobile,
+      service: SERVICE_NAME,
+      source_key: SOURCE_KEY,
+      ip_address: ipAddress,
+      utm_source: utmSource,
+    }),
+  });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Primary lead API failed with ${response.status}: ${errorText || "Unknown error"}`
-    );
+    throw new Error(`Backend submit failed with status ${response.status}`);
   }
+};
 
-  return response;
-}
-
-async function submitLeadToGoogleScript({
-  patientName,
-  mobileNumber,
-  ipAddress,
-  utmSource,
-}) {
-  const googleScriptUrl =
-    process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_URL;
-
-  await fetch(googleScriptUrl, {
+const submitToGoogleAppsScript = async ({ name, mobile, ipAddress, utmSource }) => {
+  await fetch(GOOGLE_APPS_SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
-      PatientName: patientName,
-      MobileNumber: mobileNumber,
+      PatientName: name,
+      MobileNumber: mobile,
       IP_Address: ipAddress,
       utm_source: utmSource,
     }).toString(),
   });
-}
+};
 
-async function submitLeadToPrivyr({ patientName, mobileNumber }) {
-  await fetch("https://www.privyr.com/api/v1/incoming-leads/0vZfjMQw/xKtkqD5A", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: patientName,
-      phone: `+91${mobileNumber}`,
-      display_name: patientName,
-      source: "Pediatric Landing Page",
-    }),
-  });
-}
-
-async function sendLeadEmail({ patientName, mobileNumber }) {
-  await emailjs.send(
-    "service_9ka2q7j",
-    "template_88icron",
-    {
-      patient_name: patientName || "Guest Patient",
-      mobile_number: mobileNumber,
-      service_name: "Pediatric Eye Care",
-      email_subject: "Pediatric Eye Care",
-      from_name: "Pixel Eye Hospitals",
-      from_email: "info@pixeleyehospitals.com",
-    },
-    "CNcEBk9-YnTm2Zwor"
-  );
-}
-
-export async function submitPediatricLead({ patientName, mobileNumber }) {
+// The backend saves the lead and mirrors it to the Google Sheet itself, so
+// the Apps Script is only called when the backend call fails.
+export const submitLeadWithFallback = async ({ name, mobile }) => {
   const ipAddress = await getIpAddress();
-  const utmSource = getUtmSource();
-
-  const primaryPayload = {
-    name: patientName,
-    mobile_number: mobileNumber,
-    service: "Pediatric",
-    ip_address: ipAddress,
-    utm_source: utmSource,
-  };
+  const utmSource = localStorage.getItem("utm_source") || "";
+  const lead = { name, mobile, ipAddress, utmSource };
 
   try {
-    await submitLeadToPrimaryApi(primaryPayload);
-  } catch (primaryError) {
+    await submitToBackend(lead);
+    return { submittedVia: "backend" };
+  } catch (backendError) {
     console.error(
-      "Primary lead API failed. Falling back to Google Apps Script.",
-      primaryError
+      "Backend submit failed, falling back to Google Apps Script",
+      backendError,
     );
-    await submitLeadToGoogleScript({
-      patientName,
-      mobileNumber,
-      ipAddress,
-      utmSource,
-    });
-  }
 
-  await submitLeadToPrivyr({ patientName, mobileNumber });
-  await sendLeadEmail({ patientName, mobileNumber });
-}
+    await submitToGoogleAppsScript(lead);
+    return { submittedVia: "google-apps-script" };
+  }
+};
